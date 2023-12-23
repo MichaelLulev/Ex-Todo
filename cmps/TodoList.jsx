@@ -11,7 +11,8 @@ export function TodoList({ todos, onUpdateTodo, onRemoveTodo }) {
                     todo={todo}
                     onUpdateTodo={onUpdateTodo}
                     onRemoveTodo={onRemoveTodo}
-                />)
+                />
+            )
         }
         </section>
     )

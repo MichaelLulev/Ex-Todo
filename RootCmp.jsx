@@ -20,11 +20,11 @@ export function App() {
                     <Routes>
                         <Route path="/" element={<TodoHome />} />
                         <Route path="/todo" element={<TodoApp />} />
-                        {/* <Route path="/todo/edit" element={<TodoEdit />} />
-                        <Route path="/todo/detail" element={<TodoDetails />} /> */}
+                        <Route path="/todo/:todoId" element={<TodoDetails />} />
+                        {/* <Route path="/todo/edit" element={<TodoEdit />} /> */}
                     </Routes>
                 </main>
-                <Footer />
+                {/* <Footer /> */}
             </Router>
         </Provider>
     )
