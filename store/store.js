@@ -33,16 +33,22 @@ function appReducer(state=initialState, action={}) {
     switch (action.type) {
         case SET_TODOS:
             return { ...state, todos: action.todos}
+
         case ADD_TODO:
-            return
+            var todos = [action.todo, ...state.todos]
+            return { ...state, todos }
+
         case UPDATE_TODO:
             var todos = state.todos.map(todo => todo._id === action.todo._id ? action.todo : todo)
             return { ...state, todos }
+
         case REMOVE_TODO:
             var todos = state.todos.filter(todo => todo._id !== action.todo._id)
             return { ...state, todos }
+
         case SET_LOGGED_IN_USER:
             return { ...state, loggedInUser: action.user }
+
         default:
             return state
     }

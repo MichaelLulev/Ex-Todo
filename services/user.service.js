@@ -21,7 +21,6 @@ function query() {
                 users = _createUsers()
                 utilService.saveToStorage(STORAGE_KEY_USERS, users)
             }
-            console.log('users', users)
             return users
         })
 }

@@ -9,6 +9,7 @@ export const todoService = {
     save,
     get,
     remove,
+    getNewTodo,
 }
 
 function query(filterBy={}, sortBy={}, pageInfo={}) {
@@ -57,6 +58,7 @@ function save(todo) {
         if (! loggedInUser.isAdmin && todo.creator._id !== loggedInUser._id) return Promise.reject('Not your todo to change!')
         return storageService.put(STORAGE_KEY_TODOS, todo)
     } else {
+        todo.createdAt = Date.now()
         todo.creator = loggedInUser
         return storageService.post(STORAGE_KEY_TODOS, todo)
     }

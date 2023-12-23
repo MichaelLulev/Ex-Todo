@@ -7,7 +7,6 @@ const { useSelector, useDispatch } = ReactRedux
 export function Login() {
     const dispatch = useDispatch()
     const loggedInUser = useSelector(state => state.loggedInUser)
-    console.log('loggenInUser', loggedInUser)
     const [isLogin, setIsLogin] = useState(true)
     const [formUser, setFormUser] = useState(userService.getNewUser())
 
@@ -46,6 +45,7 @@ export function Login() {
                 <button className="logout" onClick={onLogout}>
                     Logout
                 </button>
+                <h3>Logged in</h3>
                 <p>{loggedInUser.username}</p>
             </section>
         }
