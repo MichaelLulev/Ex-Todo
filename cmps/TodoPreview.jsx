@@ -7,7 +7,8 @@ export function TodoPreview({ todo, onUpdateTodo, onRemoveTodo }) {
     const isDone = todo.isDone
     const title = todo.title
     const text = todo.text
-    const creator = todo.creator.fullName
+    const fullName = todo.creator.fullName
+    const username = todo.creator.username
     const timeAgo = utilService.getTimeAgo(todo.createdAt)
 
     function onCheck(ev) {
@@ -40,7 +41,7 @@ export function TodoPreview({ todo, onUpdateTodo, onRemoveTodo }) {
             </label>
             <h3 className="todo-title" title={title}>{title}</h3>
             <p className="todo-text" title={text}>{text}</p>
-            <p className="todo-creator" title={creator}>{creator}</p>
+            <p className="todo-creator" title={`${username} aka ${fullName}`}>{fullName}</p>
             <p className="todo-createdAt" title={timeAgo}>{timeAgo}</p>
             <button className="remove" onClick={onClickRemove}>X</button>
         </article>

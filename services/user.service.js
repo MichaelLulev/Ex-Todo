@@ -5,6 +5,7 @@ const STORAGE_KEY_USERS = 'userDB'
 const STORAGE_KEY_LOGGED_IN_USER = 'loggedInUser'
 
 export const userService = {
+    query,
     signup,
     login,
     logout,

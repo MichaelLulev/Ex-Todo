@@ -29,6 +29,8 @@ body {
 }
 
 .todo-preview {
+    cursor: pointer;
+    user-select: none;
     position: relative;
     grid-column: 1 / -1;
     background-color: #ffffff;
@@ -81,4 +83,13 @@ body {
 
 .main-footer {
     padding: 0 0.5em;
+}
+
+.flex {
+    display: flex;
+    gap: 0.5em;
+}
+
+label {
+    user-select: none;
 }

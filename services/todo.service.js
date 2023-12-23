@@ -10,6 +10,8 @@ export const todoService = {
     get,
     remove,
     getNewTodo,
+    getDefaultFilter,
+    getDefaultSortBy,
 }
 
 function query(filterBy={}, sortBy={}, pageInfo={}) {
@@ -29,11 +31,27 @@ function query(filterBy={}, sortBy={}, pageInfo={}) {
 }
 
 function filter(todos, filterBy) {
+    const search = RegExp(filterBy.search, 'i')
+    if (filterBy.search) todos = todos.filter(todo => search.test(todo.title) || search.test(todo.text))
+    if (filterBy.status === 'done') todos = todos.filter(todo => todo.isDone)
+    else if (filterBy.status === 'active') todos = todos.filter(todo => ! todo.isDone)
+    if (filterBy.creator) {
+        todos = todos.filter(todo => todo.creator.fullName === filterBy.creator)
+    }
     return todos
 }
 
 function sort(todos, sortBy) {
+    const dirMult = sortBy.isAscending ? 1 : -1
+    if (['title', 'text'].includes(sortBy.field)) {
+        todos = todos.sort((todo1, todo2) => todo1[sortBy.field].localeCompare(todo2[sortBy.field]) * dirMult)
+    } else if (sortBy.field === 'creator') {
+        todos = todos.sort((todo1, todo2) => todo1.creator.fullName.localeCompare(todo2.creator.fullName) * dirMult)
+    } else if (sortBy.field === 'createdAt') {
+        todos = todos.sort((todo1, todo2) => (todo1.createdAt - todo2.createdAt) * dirMult)
+    }
     return todos
+
 }
 
 function getPage(todos, pageInfo) {
@@ -74,6 +92,23 @@ function getNewTodo() {
         creator: null,
     }
     return newTodo
+}
+
+function getDefaultFilter() {
+    const defaultFilter = {
+        search: '',
+        status: 'all',
+        creator: '',
+    }
+    return defaultFilter
+}
+
+function getDefaultSortBy() {
+    const defaultSortBy = {
+        field: 'createdAt',
+        isAscending: false,
+    }
+    return defaultSortBy
 }
 
 function _createTodos() {

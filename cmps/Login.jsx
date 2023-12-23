@@ -45,7 +45,7 @@ export function Login() {
                 <button className="logout" onClick={onLogout}>
                     Logout
                 </button>
-                <h3>Logged in as <em>{loggedInUser.username}</em></h3>
+                <h3>Logged in as <em>{loggedInUser.username}</em> aka <em>{loggedInUser.fullName}</em></h3>
             </section>
         }
         {
