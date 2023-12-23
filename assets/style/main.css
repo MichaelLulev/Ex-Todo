@@ -1,0 +1,60 @@
+body {
+    margin: 0;
+    width: 100dvw;
+}
+
+.main-screen {
+    padding: 0 0.5em;
+}
+
+.column-layout {
+    display: grid;
+    grid-template-columns: auto 1fr 2fr 8em 7em auto;
+    grid-template-rows: 4em;
+    column-gap: 1em;
+    align-items: center;
+}
+
+.todo-preview {
+    position: relative;
+    padding-inline-start: 1em;
+    grid-column: 1 / -1;
+}
+
+.todo-preview:before {
+    pointer-events: none;
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 1%;
+    left: 50%;
+    top: 50%;
+    translate: -50% -50%;
+    background-color: black;
+    transition: width 200ms;
+}
+
+.todo-preview.done:before {
+    width: 100%;
+}
+
+.todo-preview * {
+    margin: 0;
+    padding: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.todo-preview > *:first-child {
+    justify-self: center;
+}
+
+.todo-preview .remove {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 1.5em;
+    height: 1.5em;
+    border-radius: 2em;
+}
