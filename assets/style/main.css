@@ -39,7 +39,7 @@ body {
 }
 
 .todo-preview.done {
-    background-color: #d0d0d0;
+    /* background-color: #d0d0d0; */
     color: #606060;
 }
 
