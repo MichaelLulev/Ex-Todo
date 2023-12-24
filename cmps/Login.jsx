@@ -7,6 +7,12 @@ const { useSelector, useDispatch } = ReactRedux
 export function Login() {
     const dispatch = useDispatch()
     const loggedInUser = useSelector(state => state.loggedInUser)
+    const userTodos = useSelector(state => {
+        return state.todos.filter(todo => loggedInUser && todo.creator._id === loggedInUser._id)
+    })
+    const userTodosDone = useSelector(state => {
+        return state.todos.filter(todo => loggedInUser && todo.creator._id === loggedInUser._id && todo.isDone)
+    })
     const [isLogin, setIsLogin] = useState(true)
     const [formUser, setFormUser] = useState(userService.getNewUser())
 
@@ -41,12 +47,21 @@ export function Login() {
         <React.Fragment>
         {
             loggedInUser &&
-            <section className="logged-in-user">
-                <button className="logout" onClick={onLogout}>
-                    Logout
-                </button>
-                <h3>Logged in as <em>{loggedInUser.username}</em> aka <em>{loggedInUser.fullName}</em></h3>
-            </section>
+            <React.Fragment>
+                <section className="logged-in-user">
+                    <button className="logout" onClick={onLogout}>
+                        Logout
+                    </button>
+                    <h3>Logged in as <em>{loggedInUser.username}</em> aka <em>{loggedInUser.fullName}</em></h3>
+                </section>
+                <section className="progress">
+                    <label>
+                        <span>Todos complete: </span>
+                        <progress max={userTodos.length} value={userTodosDone.length}></progress>
+                        <span> {userTodosDone.length}/{userTodos.length}</span>
+                    </label>
+                </section>
+            </React.Fragment>
         }
         {
             ! loggedInUser &&
