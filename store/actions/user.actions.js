@@ -1,5 +1,5 @@
 import { userService } from "../../services/user.service.js"
-import { SET_LOGGED_IN_USER, SET_USERS } from "../reducers/user.reducer"
+import { SET_LOGGED_IN_USER, SET_USERS } from "../reducers/user.reducer.js"
 import { store } from "../store.js"
 
 

@@ -2,6 +2,7 @@ import { todoService } from "../../services/todo.service.js"
 import { ADD_TODO, REMOVE_TODO, SET_FILTER_BY, SET_SORT_BY, SET_TODOS, UPDATE_TODO } from "../reducers/todo.reducer.js"
 import { store } from "../store.js"
 
+
 export function queryTodos() {
     const filterBy = store.getState().todoModule.filterBy
     const sortBy = store.getState().todoModule.sortBy

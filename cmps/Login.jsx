@@ -5,12 +5,12 @@ const { useState } = React
 const { useSelector } = ReactRedux
 
 export function Login() {
-    const loggedInUser = useSelector(state => state.loggedInUser)
+    const loggedInUser = useSelector(state => state.userModule.loggedInUser)
     const userTodos = useSelector(state => {
-        return state.todos.filter(todo => loggedInUser && todo.creator._id === loggedInUser._id)
+        return state.todoModule.todos.filter(todo => loggedInUser && todo.creator._id === loggedInUser._id)
     })
     const userTodosDone = useSelector(state => {
-        return state.todos.filter(todo => loggedInUser && todo.creator._id === loggedInUser._id && todo.isDone)
+        return state.todoModule.todos.filter(todo => loggedInUser && todo.creator._id === loggedInUser._id && todo.isDone)
     })
     const [isLogin, setIsLogin] = useState(true)
     const [formUser, setFormUser] = useState(userService.getNewUser())

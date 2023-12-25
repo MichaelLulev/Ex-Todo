@@ -11,10 +11,10 @@ const { useSelector } = ReactRedux
 const { useEffect } = React
 
 export function TodoApp() {
-    const todos = useSelector(state => state.todos)
-    const users = useSelector(state => state.users)
-    const filterBy = useSelector(state => state.filterBy)
-    const sortBy = useSelector(state => state.sortBy)
+    const todos = useSelector(state => state.todoModule.todos)
+    const users = useSelector(state => state.userModule.users)
+    const filterBy = useSelector(state => state.todoModule.filterBy)
+    const sortBy = useSelector(state => state.todoModule.sortBy)
 
     useEffect(() => {
         queryTodos()

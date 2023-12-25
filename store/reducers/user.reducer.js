@@ -1,4 +1,4 @@
-import { userService } from "../services/user.service.js"
+import { userService } from "../../services/user.service.js"
 
 // User actions
 export const SET_LOGGED_IN_USER = 'SET_LOGGED_IN_USER'

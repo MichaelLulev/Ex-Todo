@@ -1,4 +1,4 @@
-import { todoService } from "../services/todo.service.js"
+import { todoService } from "../../services/todo.service.js"
 
 // Todo actions
 export const SET_TODOS = 'SET_TODOS'

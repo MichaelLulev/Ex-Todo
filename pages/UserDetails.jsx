@@ -7,7 +7,7 @@ const { useParams } = ReactRouterDOM
 export function UserDetails() {
     const params = useParams()
     const [user, setUser] = useState(null)
-    const loggedInUser = useSelector(state => state.loggedInUser)
+    const loggedInUser = useSelector(state => state.userModule.loggedInUser)
 
     useEffect(() => {
         if (params.userId) userService.get(params.userId).then(setUser).catch(err => console.err(err.response.data))
