@@ -1,0 +1,1355 @@
+
+./output.txt
+
+./services/user.service.js
+import { storageService } from "./async-storage.service.js"
+import { WEEK, utilService } from "./util.service.js"
+
+const STORAGE_KEY_USERS = 'userDB'
+const STORAGE_KEY_LOGGED_IN_USER = 'loggedInUser'
+
+export const userService = {
+    query,
+    signup,
+    login,
+    logout,
+    get,
+    getLoggedInUser,
+    getNewUser,
+}
+
+function query() {
+    return storageService.query(STORAGE_KEY_USERS)
+        .then(users => {
+            if (! users) users = []
+            if (! users.length) {
+                users = _createUsers()
+                utilService.saveToStorage(STORAGE_KEY_USERS, users)
+            }
+            return users
+        })
+}
+
+function signup(user) {
+    return query()
+        .then(users => {
+            if (users.find(_user => _user.username === user.username)) return Promise.reject('User already exists')
+            if (! user.password) return Promise.reject('Missing password')
+            if (! user.fullName) return Promise.reject('Missing fullName')
+            return storageService.post(STORAGE_KEY_USERS, user)
+                .then(_setLoggedInUser)
+        })
+}
+
+function login(user) {
+    return query()
+        .then(users => {
+            const userToLogin = users.find(_user => _user.username === user.username)
+            if (! userToLogin) return Promise.reject(`No such user '${user.username}'`)
+            if (user.password !== userToLogin.password) return Promise.reject('Wrong password!')
+            return _setLoggedInUser(userToLogin)
+        })
+}
+
+function logout() {
+    sessionStorage.removeItem(STORAGE_KEY_LOGGED_IN_USER)
+    return Promise.resolve()
+}
+
+function get(userId) {
+    return storageService.get(STORAGE_KEY_USERS, userId)
+}
+
+function _setLoggedInUser(user) {
+    const loggedInUser = { ...user }
+    delete loggedInUser.password
+    const strLoggedInUser = JSON.stringify(loggedInUser)
+    sessionStorage.setItem(STORAGE_KEY_LOGGED_IN_USER, strLoggedInUser)
+    return loggedInUser
+}
+
+function getLoggedInUser() {
+    const strLoggedInUser = sessionStorage.getItem(STORAGE_KEY_LOGGED_IN_USER)
+    const loggedInUser = JSON.parse(strLoggedInUser)
+    return loggedInUser
+}
+
+function getNewUser() {
+    const newUser = {
+        _id: '',
+        fullName: '',
+        username: '',
+        password: '',
+        createdAt: NaN,
+        isAdmin: false,
+    }
+    return newUser
+}
+
+function _createUsers() {
+    const newUsers = [
+        {
+            _id: '6a454fef54a4',
+            fullName: 'Coffee Connoisseur',
+            username: 'caffeineQueen95',
+            password: 'espressoLove123', // Don't worry, it's triple-shot encrypted! 
+            bio: "Fueled by caffeine and sarcasm, I code faster than my anxiety attacks.",
+            createdAt: utilService.getRandomDate(5 * WEEK) - WEEK, // Joined for a late-night caffeine fix
+            isAdmin: false,
+        },
+        {
+            _id: '2b54a985g754',
+            fullName: 'Lord of the Procrastinators',
+            username: 'dueTomorrow',
+            password: 'illDoItLater456', // Procrastinated on creating a strong password too 
+            bio: "Deadlines? Never heard of her. My motto: Why do today what you can panic about tomorrow?",
+            createdAt: utilService.getRandomDate(5 * WEEK) - WEEK, // Just under the deadline, of course
+            isAdmin: false,
+        },
+        {
+            _id: '54h54h54a454',
+            fullName: 'Admin McCryptic',
+            username: 'iamdefinitelynotadmin',
+            password: 'hunter2', //  (Shhh, don't tell anyone)
+            bio: "I exist in the shadows, silently fixing your typos and existential dread... maybe.",
+            createdAt: utilService.getRandomDate(5 * WEEK) - WEEK, // Here since the beginning of time...or at least 2023
+            isAdmin: true,
+        },
+        {
+            _id: 'c4t50n1735d6',
+            fullName: 'Meme Magician',
+            username: 'gifMasterX',
+            password: 'laughtrack.mp3', // Don't ask how they know that sound
+            bio: "I speak fluent meme and can turn any awkward silence into a viral sensation. Beware my dad jokes.",
+            createdAt: utilService.getRandomDate(5 * WEEK) - WEEK, // Joined during a particularly hilarious cat video binge
+            isAdmin: false,
+        },
+        {
+            _id: '00f100f110f1',
+            fullName: 'Bug Whisperer',
+            username: 'codeSamurai',
+            password: 'semicolonWarrior', // They live dangerously
+            bio: "I hunt down bugs with the precision of a ninja and the patience of a saint. Don't break anything, I'm caffeinated enough.",
+            createdAt: utilService.getRandomDate(5 * WEEK) - WEEK, // Joined after slaying a particularly nasty server error
+            isAdmin: false,
+        },
+        {
+            _id: 'b313371337b3',
+            fullName: 'Design Dynamo',
+            username: 'pixelPicasso',
+            password: 'CMYKforever', // True to their color-loving heart
+            bio: "I bend pixels to my will, crafting interfaces that are as sleek as they are functional. Prepare to be dazzled.",
+            createdAt: utilService.getRandomDate(5 * WEEK) - WEEK, // Joined after creating a website so beautiful it wept glitter
+            isAdmin: false,
+        },
+        {
+            _id: 'd10d010010d0',
+            fullName: 'Data Detective',
+            username: 'spreadsheetSherlock',
+            password: 'pivotTablePower', // Don't underestimate their Excel skills
+            bio: "Numbers whisper secrets to me. I can predict your coffee order and track down any typo lurking in a database. You can't hide from the truth.",
+            createdAt: utilService.getRandomDate(5 * WEEK) - WEEK, // Joined after unearthing a hidden pattern in a million lines of code
+            isAdmin: false,
+        },
+        {
+            _id: '1234567890ab',
+            fullName: 'Social Butterfly',
+            username: 'hashtagQueen',
+            password: 'followMeFriday', // They know the algorithm's game
+            bio: "I speak the language of likes and shares. Follow me for cat memes, motivational quotes, and behind-the-scenes glimpses of this glorious chaos.",
+            createdAt: utilService.getRandomDate(5 * WEEK) - WEEK, // Joined after their cat video went viral overnight
+            isAdmin: false,
+        },
+    ]
+    return newUsers
+}
+./services/async-storage.service.js
+export const storageService = {
+    query,
+    get,
+    post,
+    put,
+    remove,
+}
+
+function query(entityType, delay = 0) {
+    var entities = JSON.parse(localStorage.getItem(entityType)) || []
+    return new Promise(resolve => setTimeout(() => resolve(entities), delay))
+}
+
+function get(entityType, entityId) {
+    return query(entityType).then(entities => {
+        const entity = entities.find(entity => entity._id === entityId)
+        if (!entity) throw new Error(`Get failed, cannot find entity with id: ${entityId} in: ${entityType}`)
+        return entity
+    })
+}
+
+function post(entityType, newEntity) {
+    newEntity = {...newEntity}
+    newEntity._id = _makeId()
+    return query(entityType).then(entities => {
+        entities.unshift(newEntity)
+        _save(entityType, entities)
+        return newEntity
+    })
+}
+
+function put(entityType, updatedEntity) {
+    return query(entityType).then(entities => {
+        const idx = entities.findIndex(entity => entity._id === updatedEntity._id)
+        if (idx < 0) throw new Error(`Update failed, cannot find entity with id: ${updatedEntity._id} in: ${entityType}`)
+        entities.splice(idx, 1, updatedEntity)
+        _save(entityType, entities)
+        return updatedEntity
+    })
+}
+
+function remove(entityType, entityId) {
+    return query(entityType).then(entities => {
+        const idx = entities.findIndex(entity => entity._id === entityId)
+        if (idx < 0) throw new Error(`Remove failed, cannot find entity with id: ${entityId} in: ${entityType}`)
+        entities.splice(idx, 1)
+        _save(entityType, entities)
+    })
+}
+
+// Private functions
+
+function _save(entityType, entities) {
+    localStorage.setItem(entityType, JSON.stringify(entities))
+}
+
+function _makeId(length = 5) {
+    var text = ''
+    var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+    for (var i = 0; i < length; i++) {
+        text += possible.charAt(Math.floor(Math.random() * possible.length))
+    }
+    return text
+}
+./services/todo.service.js
+import { utilService, WEEK } from "./util.service.js"
+import { storageService } from "./async-storage.service.js"
+import { userService } from "./user.service.js"
+
+const STORAGE_KEY_TODOS = 'todoDB'
+
+export const todoService = {
+    query,
+    save,
+    get,
+    remove,
+    getNewTodo,
+    getDefaultFilter,
+    getDefaultSortBy,
+}
+
+function query(filterBy={}, sortBy={}, pageInfo={}) {
+    return storageService.query(STORAGE_KEY_TODOS)
+        .then(todos => {
+            if (! todos) todos = []
+            if (! todos.length) {
+                todos = _createTodos()
+                utilService.saveToStorage(STORAGE_KEY_TODOS, todos)
+            }
+            return todos
+        })
+        .then(todos => filter(todos, filterBy))
+        .then(todos => sort(todos, sortBy))
+        .then(todos => getPage(todos, pageInfo))
+        .catch(err => console.error(err))
+}
+
+function filter(todos, filterBy) {
+    const search = RegExp(filterBy.search, 'i')
+    if (filterBy.search) todos = todos.filter(todo => search.test(todo.title) || search.test(todo.text))
+    if (filterBy.status === 'done') todos = todos.filter(todo => todo.isDone)
+    else if (filterBy.status === 'active') todos = todos.filter(todo => ! todo.isDone)
+    if (filterBy.creator) {
+        todos = todos.filter(todo => todo.creator.fullName === filterBy.creator)
+    }
+    return todos
+}
+
+function sort(todos, sortBy) {
+    const dirMult = sortBy.isAscending ? 1 : -1
+    if (['title', 'text'].includes(sortBy.field)) {
+        todos = todos.sort((todo1, todo2) => todo1[sortBy.field].localeCompare(todo2[sortBy.field]) * dirMult)
+    } else if (sortBy.field === 'creator') {
+        todos = todos.sort((todo1, todo2) => todo1.creator.fullName.localeCompare(todo2.creator.fullName) * dirMult)
+    } else if (sortBy.field === 'createdAt') {
+        todos = todos.sort((todo1, todo2) => (todo1.createdAt - todo2.createdAt) * dirMult)
+    }
+    return todos
+
+}
+
+function getPage(todos, pageInfo) {
+    return todos
+}
+
+function get(todoId) {
+    return storageService.get(STORAGE_KEY_TODOS, todoId)
+}
+
+function remove(todo) {
+    const loggedInUser = userService.getLoggedInUser()
+    if (! loggedInUser) return Promise.reject('Not logged in')
+    if (! loggedInUser.isAdmin && todo.creator._id !== loggedInUser._id) return Promise.reject('Not your todo to remove!')
+    return storageService.remove(STORAGE_KEY_TODOS, todo._id)
+}
+
+function save(todo) {
+    const loggedInUser = userService.getLoggedInUser()
+    if (! loggedInUser) return Promise.reject('Not logged in')
+    if (todo._id) {
+        if (! loggedInUser.isAdmin && todo.creator._id !== loggedInUser._id) return Promise.reject('Not your todo to change!')
+        return storageService.put(STORAGE_KEY_TODOS, todo)
+    } else {
+        todo.createdAt = Date.now()
+        todo.creator = loggedInUser
+        return storageService.post(STORAGE_KEY_TODOS, todo)
+    }
+}
+
+function getNewTodo() {
+    const newTodo = {
+        _id: '',
+        title: '',
+        text: '',
+        isDone: false,
+        createdAt: NaN,
+        creator: null,
+    }
+    return newTodo
+}
+
+function getDefaultFilter() {
+    const defaultFilter = {
+        search: '',
+        status: 'all',
+        creator: '',
+    }
+    return defaultFilter
+}
+
+function getDefaultSortBy() {
+    const defaultSortBy = {
+        field: 'createdAt',
+        isAscending: false,
+    }
+    return defaultSortBy
+}
+
+function _createTodos() {
+    const newTodos = [
+        {
+            _id: 'caffeineOverflow',
+            title: 'Code a Coffee Tracker',
+            text: 'Develop an app to track Coffee Connoisseur’s coffee intake. Warning: Numbers might be off the charts!',
+            createdAt: utilService.getRandomDate(5 * WEEK),
+            isDone: true,
+            creator: {
+                _id: '6a454fef54a4',
+                fullName: 'Coffee Connoisseur',
+                username: 'caffeineQueen95',
+                isAdmin: false,
+            },
+        },
+        {
+            _id: 'procrastinationParadox',
+            title: 'Design a Perpetual Calendar',
+            text: 'Lord of the Procrastinators needs to create a calendar where it’s always the day before the deadline.',
+            createdAt: utilService.getRandomDate(5 * WEEK),
+            isDone: false,
+            creator: {
+                _id: '2b54a985g754',
+                fullName: 'Lord of the Procrastinators',
+                username: 'dueTomorrow',
+                isAdmin: false,
+            },
+        },
+        {
+            _id: 'shadowRealmFixes',
+            title: 'Host a Mystery Typo Hunt',
+            text: 'Admin McCryptic to create a scavenger hunt for hidden typos in the codebase. Spoiler: They’re everywhere!',
+            createdAt: utilService.getRandomDate(5 * WEEK),
+            isDone: false,
+            creator: {
+                _id: '54h54h54a454',
+                fullName: 'Admin McCryptic',
+                username: 'iamdefinitelynotadmin',
+                isAdmin: true,
+            },
+        },
+        {
+            _id: 'memeMagic',
+            title: 'Invent a Meme Generator',
+            text: 'Meme Magician to create an AI that turns office incidents into instant memes. Disclaimer: Dad jokes included.',
+            createdAt: utilService.getRandomDate(5 * WEEK),
+            isDone: true,
+            creator: {
+                _id: 'c4t50n1735d6',
+                fullName: 'Meme Magician',
+                username: 'gifMasterX',
+                isAdmin: false,
+            },
+        },
+        {
+            _id: 'bugBashBonanza',
+            title: 'Organize a Bug Bash Event',
+            text: 'Bug Whisperer to lead a bug-finding marathon. Prizes include unlimited coffee and bragging rights.',
+            createdAt: utilService.getRandomDate(5 * WEEK),
+            isDone: true,
+            creator: {
+                _id: '00f100f110f1',
+                fullName: 'Bug Whisperer',
+                username: 'codeSamurai',
+                isAdmin: false,
+            },
+        },
+        {
+            _id: 'glitterGalore',
+            title: 'Revamp the Break Room',
+            text: 'Design Dynamo’s mission: Transform the break room into an art gallery. Expect an explosion of colors and creativity!',
+            createdAt: utilService.getRandomDate(5 * WEEK),
+            isDone: false,
+            creator: {
+                _id: 'b313371337b3',
+                fullName: 'Design Dynamo',
+                username: 'pixelPicasso',
+                isAdmin: false,
+            },
+        },
+        {
+            _id: 'dataDetectiveDiaries',
+            title: 'Solve the Mystery of Missing Snacks',
+            text: 'Data Detective to use analytics to find out who’s been sneaking extra snacks from the kitchen.',
+            createdAt: utilService.getRandomDate(5 * WEEK),
+            isDone: true,
+            creator: {
+                _id: 'd10d010010d0',
+                fullName: 'Data Detective',
+                username: 'spreadsheetSherlock',
+                isAdmin: false,
+            },
+        },
+        {
+            _id: 'hashtagHijinks',
+            title: 'Launch a Viral Office Campaign',
+            text: 'Social Butterfly to start an office challenge on social media. Goal: Make #OfficeLife the next big trend.',
+            createdAt: utilService.getRandomDate(5 * WEEK),
+            isDone: false,
+            creator: {
+                _id: '1234567890ab',
+                fullName: 'Social Butterfly',
+                username: 'hashtagQueen',
+                isAdmin: false,
+            },
+        },
+        {
+            _id: 'pixelPerfection',
+            title: 'Design a Digital Zen Garden',
+            text: 'Pixel Picasso to create a calming, digital space where everyone can relax their eyes after hours of coding.',
+            createdAt: utilService.getRandomDate(5 * WEEK),
+            isDone: false,
+            creator: {
+                _id: 'b313371337b3',
+                fullName: 'Design Dynamo',
+                username: 'pixelPicasso',
+                isAdmin: false,
+            },
+        },
+        {
+            _id: 'spreadsheetSaga',
+            title: 'Host an Excel Esports Event',
+            text: 'Spreadsheet Sherlock to organize an Excel championship. May the best function win!',
+            createdAt: utilService.getRandomDate(5 * WEEK),
+            isDone: true,
+            creator: {
+                _id: 'd10d010010d0',
+                fullName: 'Data Detective',
+                username: 'spreadsheetSherlock',
+                isAdmin: false,
+            },
+        },
+        {
+            _id: 'codeConundrum',
+            title: 'Organize a Mystery Hackathon',
+            text: 'Code Samurai to host a surprise coding challenge. Theme revealed on the day. Bring your samurai spirit!',
+            createdAt: utilService.getRandomDate(5 * WEEK),
+            isDone: false,
+            creator: {
+                _id: '00f100f110f1',
+                fullName: 'Bug Whisperer',
+                username: 'codeSamurai',
+                isAdmin: false,
+            },
+        },
+        {
+            _id: 'socialSymphony',
+            title: 'Compose a Social Media Opera',
+            text: 'Hashtag Queen to orchestrate a week-long social media event with dramatic twists and turns.',
+            createdAt: utilService.getRandomDate(5 * WEEK),
+            isDone: false,
+            creator: {
+                _id: '1234567890ab',
+                fullName: 'Social Butterfly',
+                username: 'hashtagQueen',
+                isAdmin: false,
+            },
+        },
+        {
+            _id: 'caffeineCraze',
+            title: 'Brew the Ultimate Coffee',
+            text: 'Coffee Connoisseur to experiment with different beans to find the ultimate coffee blend.',
+            createdAt: utilService.getRandomDate(5 * WEEK),
+            isDone: false,
+            creator: {
+                _id: '6a454fef54a4',
+                fullName: 'Coffee Connoisseur',
+                username: 'caffeineQueen95',
+                isAdmin: false,
+            },
+        },
+        {
+            _id: 'memeMania',
+            title: 'Curate an Office Meme Gallery',
+            text: 'Meme Magician to collect and display the funniest office memes in a digital gallery.',
+            createdAt: utilService.getRandomDate(5 * WEEK),
+            isDone: true,
+            creator: {
+                _id: 'c4t50n1735d6',
+                fullName: 'Meme Magician',
+                username: 'gifMasterX',
+                isAdmin: false,
+            },
+        }
+    ]
+    return newTodos
+}
+./services/util.service.js
+export const utilService = {
+    makeId,
+    makeLorem,
+    getRandomIntInclusive,
+    loadFromStorage,
+    saveToStorage,
+    animateCSS,
+    getRandomDate,
+    getTimeAgo,
+}
+
+export const SECOND = 1000
+export const MINUTE = 60 * SECOND
+export const HOUR = 60 * MINUTE
+export const DAY = 24 * HOUR
+export const WEEK = 7 * DAY
+
+function getRandomDate(timeSpan) {
+    return Date.now() - getRandomIntInclusive(0, timeSpan)
+}
+
+function getTimeAgo(time) {
+    const timeDiff = Date.now() - time
+    const seconds = Math.floor(timeDiff / SECOND)
+    const minutes = Math.floor(timeDiff / MINUTE)
+    const hours = Math.floor(timeDiff / HOUR)
+    const days = Math.floor(timeDiff / DAY)
+    const weeks = Math.floor(timeDiff / WEEK)
+    if (timeDiff < MINUTE) return seconds + ` second${seconds === 1 ? '' : 's'} ago`
+    if (timeDiff < HOUR) return minutes + ` minute${minutes === 1 ? '' : 's'} ago`
+    if (timeDiff < DAY) return hours + ` hour${hours === 1 ? '' : 's'} ago`
+    if (timeDiff < WEEK) return days + ` day${days === 1 ? '' : 's'} ago`
+    return weeks + ` week${weeks === 1 ? '' : 's'} ago`
+}
+
+function makeId(length = 6) {
+    var txt = ''
+    var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+
+    for (var i = 0; i < length; i++) {
+        txt += possible.charAt(Math.floor(Math.random() * possible.length))
+    }
+
+    return txt
+}
+
+function makeLorem(size = 100) {
+    var words = ['The sky', 'above', 'the port', 'was', 'the color of television', 'tuned', 'to', 'a dead channel', '.', 'All', 'this happened', 'more or less', '.', 'I', 'had', 'the story', 'bit by bit', 'from various people', 'and', 'as generally', 'happens', 'in such cases', 'each time', 'it', 'was', 'a different story', '.', 'It', 'was', 'a pleasure', 'to', 'burn']
+    var txt = ''
+    while (size > 0) {
+        size--
+        txt += words[Math.floor(Math.random() * words.length)] + ' '
+    }
+    return txt
+}
+
+function getRandomIntInclusive(min, max) {
+    min = Math.ceil(min)
+    max = Math.floor(max)
+    return Math.floor(Math.random() * (max - min + 1)) + min //The maximum is inclusive and the minimum is inclusive 
+}
+
+function saveToStorage(key, value) {
+    localStorage.setItem(key, JSON.stringify(value))
+}
+
+function loadFromStorage(key) {
+    const data = localStorage.getItem(key)
+    return (data) ? JSON.parse(data) : undefined
+}
+
+// In our utilService
+function animateCSS(el, animation) {
+    const prefix = 'animate__'
+    return new Promise((resolve, reject) => {
+        const animationName = `${prefix}${animation}`
+
+        el.classList.add(`${prefix}animated`, animationName)
+
+        // When the animation ends, we clean the classes and resolve the Promise
+        function handleAnimationEnd(event) {
+            event.stopPropagation()
+            el.classList.remove(`${prefix}animated`, animationName)
+            resolve('Animation ended')
+        }
+        el.addEventListener('animationend', handleAnimationEnd, { once: true })
+    })
+}
+./cmps/TodoFilter.jsx
+
+
+
+export function TodoFilter({ users, filterBy, onSetFilterBy}) {
+
+    function onChangeFilterBy(ev) {
+        const name = ev.target.name
+        const value = ev.target.value
+        onSetFilterBy({ [name]: value })
+    }
+
+    return (
+        <section className="todo-filter">
+            <h2>Filter</h2>
+            <div className="flex">
+                <label>
+                    <span>Search: </span>
+                    <input type="text" name="search" value={filterBy.search} onChange={onChangeFilterBy}/>
+                </label>
+                <label>
+                    <span>Status: </span>
+                    <select name="status" className="filter-status" value={filterBy.status} onChange={onChangeFilterBy}>
+                        <option value="">All</option>
+                        <option value="active">Active</option>
+                        <option value="done">Done</option>
+                    </select>
+                </label>
+                <label>
+                    <span>Creator: </span>
+                    <select name="creator" className="filter-creator" value={filterBy.creator} onChange={onChangeFilterBy}>
+                        <option value="">All</option>
+                    {
+                        users.map(user => 
+                            <option key={user._id}>{user.fullName}</option>
+                        )
+                    }
+                    </select>
+                </label>
+            </div>
+        </section>
+    )
+}
+./cmps/Footer.jsx
+
+
+
+export function Footer() {
+
+    return (
+        <footer className="main-footer">
+            <h2>This is the footer</h2>
+        </footer>
+    )
+}
+./cmps/TodoList.jsx
+import { TodoPreview } from "./TodoPreview.jsx"
+
+export function TodoList({ todos, onUpdateTodo, onRemoveTodo }) {
+
+    return (
+        <section className="todo-list column-layout">
+        {
+            todos.map(todo =>
+                <TodoPreview
+                    key={todo._id}
+                    todo={todo}
+                    onUpdateTodo={onUpdateTodo}
+                    onRemoveTodo={onRemoveTodo}
+                />
+            )
+        }
+        </section>
+    )
+}
+./cmps/Login.jsx
+import { SET_LOGGED_IN_USER } from '../store/store.js'
+import { userService } from '../services/user.service.js'
+
+const { useState } = React
+const { useSelector, useDispatch } = ReactRedux
+const { NavLink } = ReactRouterDOM
+
+export function Login() {
+    const dispatch = useDispatch()
+    const loggedInUser = useSelector(state => state.loggedInUser)
+    const userTodos = useSelector(state => {
+        return state.todos.filter(todo => loggedInUser && todo.creator._id === loggedInUser._id)
+    })
+    const userTodosDone = useSelector(state => {
+        return state.todos.filter(todo => loggedInUser && todo.creator._id === loggedInUser._id && todo.isDone)
+    })
+    const [isLogin, setIsLogin] = useState(true)
+    const [formUser, setFormUser] = useState(userService.getNewUser())
+
+    function onChangeFormUser(ev) {
+        const name = ev.target.name
+        const value = ev.target.value
+        setFormUser(prev => ({ ...prev, [name]: value }))
+    }
+
+    function onSubmitForm(ev) {
+        ev.preventDefault()
+        if (! isLogin) var formFunction = userService.signup
+        else var formFunction = userService.login
+        formFunction(formUser)
+            .then(user => {
+                dispatch({ type: SET_LOGGED_IN_USER, user })
+                setFormUser(userService.getNewUser())
+            })
+            .catch(err => console.error(err))
+    }
+
+    function onLogout() {
+        userService.logout()
+            .then(() => {
+                dispatch({ type: SET_LOGGED_IN_USER, user: null })
+                setFormUser(userService.getNewUser())
+            })
+            .catch(err => console.error(err))
+    }
+    
+    return (
+        <React.Fragment>
+        {
+            loggedInUser &&
+            <React.Fragment>
+                <section className="logged-in-user">
+                    <button className="logout" onClick={onLogout}>
+                        Logout
+                    </button>
+                    <h3>Logged in as <em>{loggedInUser.username}</em> aka <em>{loggedInUser.fullName}</em></h3>
+                </section>
+                <section className="progress">
+                    <label>
+                        <span>Todos complete: </span>
+                        <progress max={userTodos.length} value={userTodosDone.length}></progress>
+                        <span> {userTodosDone.length}/{userTodos.length}</span>
+                    </label>
+                </section>
+                <NavLink to="/">User page</NavLink>
+            </React.Fragment>
+        }
+        {
+            ! loggedInUser &&
+            <section className="login">
+            {
+                ! isLogin &&
+                <button className="login-button" onClick={() => setIsLogin(prev => ! prev)}>
+                    Login
+                </button>
+            }
+            {
+                isLogin &&
+                <button className="signup-button" onClick={() => setIsLogin(prev => ! prev)}>
+                    Sign up
+                </button>
+            }
+                <h3>{isLogin ? 'Login' : 'Sign up'}</h3>
+                <form className="login-form" onSubmit={onSubmitForm}>
+                {
+                    ! isLogin &&
+                    <label>
+                        <span>Full name: </span>
+                        <input
+                            type="text"
+                            name="fullName"
+                            value={formUser.fullName}
+                            onChange={onChangeFormUser}
+                        />
+                    </label>
+                }
+                    <label>
+                        <span>Username: </span>
+                        <input
+                            type="text"
+                            name="username"
+                            value={formUser.username}
+                            onChange={onChangeFormUser}
+                        />
+                    </label>
+                    <label>
+                        <span>Password: </span>
+                        <input
+                            type="password"
+                            name="password"
+                            value={formUser.password}
+                            onChange={onChangeFormUser}
+                        />
+                    </label>
+                    <button className="submit-button">
+                        Submit
+                    </button>
+                </form>
+            </section>
+        }
+        </React.Fragment>
+    )
+}
+./cmps/Header.jsx
+import { Login } from "./Login.jsx"
+
+const { useSelector, useDispatch } = ReactRedux
+
+export function Header() {
+
+    return (
+        <header className="main-header">
+            <Login />
+        </header>
+    )
+}
+./cmps/TodoPreview.jsx
+import { utilService } from "../services/util.service.js"
+
+const { useNavigate } = ReactRouterDOM
+
+export function TodoPreview({ todo, onUpdateTodo, onRemoveTodo }) {
+    const navigate = useNavigate()
+    const isDone = todo.isDone
+    const title = todo.title
+    const text = todo.text
+    const fullName = todo.creator.fullName
+    const username = todo.creator.username
+    const timeAgo = utilService.getTimeAgo(todo.createdAt)
+
+    function onCheck(ev) {
+        ev.stopPropagation()
+        onUpdateTodo({ ...todo, isDone: ev.target.checked })
+    }
+
+    function onClickRemove(ev) {
+        ev.stopPropagation()
+        onRemoveTodo(todo)
+    }
+
+    function onClickTodo(ev) {
+        navigate(`/todo/${todo._id}`)
+    }
+
+    return (
+        <article
+            className={`todo-preview column-layout ${isDone ? 'done' : ''}`}
+            onClick={onClickTodo}
+        >
+            <label>
+                <input
+                    type="checkbox"
+                    name="isDone"
+                    checked={isDone}
+                    onChange={onCheck}
+                    onClick={ev => ev.stopPropagation()}
+                />
+            </label>
+            <h3 className="todo-title" title={title}>{title}</h3>
+            <p className="todo-text" title={text}>{text}</p>
+            <p className="todo-creator" title={`${username} aka ${fullName}`}>{fullName}</p>
+            <p className="todo-createdAt" title={timeAgo}>{timeAgo}</p>
+            <button className="remove" onClick={onClickRemove}>X</button>
+        </article>
+    )
+}
+./cmps/TodoSort.jsx
+
+
+
+export function TodoSort({ sortBy, onSetSortBy }) {
+
+    function onChangeSortBy(ev) {
+        const name = ev.target.name
+        let value = ev.target.value
+        if (name === 'isAscending') value = ev.target.checked
+        onSetSortBy({ [name]: value })
+    }
+
+    return (
+        <section className="todo-filter">
+            <h2>Sort</h2>
+            <div className="flex">
+                <label>
+                    <span>Field: </span>
+                    <select
+                        name="field"
+                        className="sort-field"
+                        value={sortBy.field}
+                        onChange={onChangeSortBy}
+                    >
+                        <option value="title">Title</option>
+                        <option value="text">Text</option>
+                        <option value="creator">Creator</option>
+                        <option value="createdAt">Created at</option>
+                    </select>
+                </label>
+                <label>
+                    <span>Ascending: </span>
+                    <input
+                        type="checkbox"
+                        name="isAscending"
+                        checked={sortBy.isAscending}
+                        // value={sortBy.isAscending}
+                        onChange={onChangeSortBy}
+                    />
+                </label>
+            </div>
+        </section>
+    )
+}
+./RootCmp.jsx
+import { store } from './store/store.js'
+import { Header } from './cmps/Header.jsx'
+import { TodoHome } from './pages/TodoHome.jsx'
+import { TodoApp } from './pages/TodoApp.jsx'
+import { TodoDetails } from './pages/TodoDetails.jsx'
+import { UserDetails } from './pages/UserDetails.jsx'
+
+const Router = ReactRouterDOM.HashRouter
+const { Route, Routes } = ReactRouterDOM
+const { Provider } = ReactRedux
+
+export function App() {
+    
+    return (
+        <Provider store={store}>
+            <Router>
+                <Header />
+                <main className='main-screen'>
+                    <Routes>
+                        <Route path="/" element={<TodoHome />} />
+                        <Route path="/todo" element={<TodoApp />} />
+                        <Route path="/todo/:todoId" element={<TodoDetails />} />
+                        <Route path="/user" element={<UserDetails />} />
+                        <Route path="/user/:userId" element={<UserDetails />} />
+                    </Routes>
+                </main>
+            </Router>
+        </Provider>
+    )
+}
+./index.html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <script src="lib/react.js"></script>
+        <script src="lib/react-dom.js"></script>
+        <script src="lib/history.js"></script>
+        <script src="lib/react-router.js"></script>
+        <script src="lib/react-router-dom.js"></script>
+
+        <link rel="stylesheet" href="assets/style/main.css">
+
+        <title>Todo</title>
+    </head>
+    <body>
+        <div id="root"></div>
+
+        <script type="module/babel" data-presets="ca-preset" src="app.js"></script>
+
+        <script src="lib/loadBabelModules.js"></script>
+        <script src="lib/babel.js"></script>
+        <script src="lib/babel-preset.js"></script>
+        <script src="lib/react-redux.js"></script>
+        <script src="lib/redux.js"></script>
+    </body>
+</html>
+./store/store.js
+import { todoService } from "../services/todo.service.js"
+import { userService } from "../services/user.service.js"
+
+const { createStore } = Redux
+
+// Todo actions
+export const SET_TODOS = 'SET_TODOS'
+export const ADD_TODO = 'ADD_TODO'
+export const UPDATE_TODO = 'UPDATE_TODO'
+export const REMOVE_TODO = 'REMOVE_TODO'
+
+// Filtering and sorting actions
+export const SET_FILTER_BY = 'SET_FILTER_BY'
+export const SET_SORT_BY = 'SET_SORT_BY'
+
+// User actions
+export const SET_LOGGED_IN_USER = 'SET_LOGGED_IN_USER'
+export const SET_USERS = 'SET_USERS'
+
+// Global store
+
+
+const initialState = {
+    loggedInUser: userService.getLoggedInUser(),
+    users: [],
+    todos: [],
+    filterBy: todoService.getDefaultFilter(),
+    sortBy: todoService.getDefaultSortBy(),
+    pageInfo: {},
+    isLoading: false,
+}
+
+export const store = createStore(appReducer)
+
+window.gStore = store
+
+function appReducer(state=initialState, action={}) {
+    
+    switch (action.type) {
+        case SET_TODOS:
+            return { ...state, todos: action.todos}
+
+        case ADD_TODO:
+            var todos = [action.todo, ...state.todos]
+            return { ...state, todos }
+
+        case UPDATE_TODO:
+            var todos = state.todos.map(todo => todo._id === action.todo._id ? action.todo : todo)
+            return { ...state, todos }
+
+        case REMOVE_TODO:
+            var todos = state.todos.filter(todo => todo._id !== action.todo._id)
+            return { ...state, todos }
+
+        case SET_FILTER_BY:
+            var filterBy = { ...state.filterBy, ...action.filterBy }
+            return { ...state, filterBy }
+
+        case SET_SORT_BY:
+            var sortBy = { ...state.sortBy, ...action.sortBy }
+            return { ...state, sortBy }
+
+        case SET_LOGGED_IN_USER:
+            return { ...state, loggedInUser: action.user }
+
+        case SET_USERS:
+            return { ...state, users: action.users}
+
+        default:
+            return state
+    }
+}
+./assets/style/main.css
+body {
+    margin: 0;
+}
+
+.main-header {
+    padding: 0.5em 0.5em 0;
+}
+
+.main-header .login-form {
+    display: flex;
+    gap: 0.5em;
+}
+
+.main-screen {
+    padding: 0 0.5em;
+}
+
+.button-container {
+    display: flex;
+    gap: 0.5em;
+}
+
+.column-layout {
+    display: grid;
+    grid-template-columns: auto 1fr 2fr 8em 7em auto;
+    grid-template-rows: 4em;
+    column-gap: 1em;
+    align-items: center;
+}
+
+.todo-preview {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    grid-column: 1 / -1;
+    background-color: #ffffff;
+    color: #000000;
+    transition: color 200ms, background-color 200ms;
+}
+
+.todo-preview.done {
+    /* background-color: #d0d0d0; */
+    color: #606060;
+}
+
+.todo-preview:before {
+    pointer-events: none;
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 1%;
+    left: 50%;
+    top: 50%;
+    translate: -50% -50%;
+    background-color: black;
+    transition: width 200ms;
+}
+
+.todo-preview.done:before {
+    width: 100%;
+}
+
+.todo-preview * {
+    margin: 0;
+    padding: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.todo-preview > *:first-child {
+    justify-self: center;
+}
+
+.todo-preview .remove {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 1.5em;
+    height: 1.5em;
+    border-radius: 2em;
+}
+
+.main-footer {
+    padding: 0 0.5em;
+}
+
+.flex {
+    display: flex;
+    gap: 0.5em;
+}
+
+label {
+    user-select: none;
+}
+./pages/TodoHome.jsx
+
+const { NavLink } = ReactRouterDOM
+
+export function TodoHome() {
+
+    return (
+        <React.Fragment>
+            <h1>Todo App</h1>
+            <NavLink to="/todo">Go to app</NavLink>
+        </React.Fragment>
+    )
+}
+./pages/TodoDetails.jsx
+import { utilService } from "../services/util.service.js"
+import { todoService } from "../services/todo.service.js"
+
+const { useParams, NavLink } = ReactRouterDOM
+const { useEffect, useState } = React
+
+export function TodoDetails() {
+    const params = useParams()
+    const [todo, setTodo] = useState()
+    
+    useEffect(() => {
+        todoService.get(params.todoId)
+            .then(todo => {
+                setTodo(todo)
+            })
+            .catch(err => {
+                console.error(err)
+                setTodo(null)
+            })
+    }, [])
+
+    function onEditTodo(ev) {
+        const title = prompt('Enter title', todo.title) || 'No title'
+        const text = prompt('Enter text', todo.text) || 'No text'
+        todoService.save({ ...todo, title, text })
+            .then(setTodo)
+            .catch(err => console.error(err))
+    }
+
+    if (todo === undefined) return <div>Loading...</div>
+    if (todo === null) return <div>No todo with id '{params.todoId}'</div>
+    return (
+        <React.Fragment>
+            <NavLink to="/todo">Back</NavLink>
+            <div className="todo-details">
+                <h2 className="todo-title">{todo.title}</h2>
+                <p className="todo-text">{todo.text}</p>
+                <p className="todo-isDone">{todo.isDone ? 'Complete!' : 'In progress...'}</p>
+                <p className="todo-createdAt">Created {utilService.getTimeAgo(todo.createdAt)} at {new Date(todo.createdAt).toLocaleString()}</p>
+                <p className="todo-creator">Created by <em>{todo.creator.username}</em> aka <em>{todo.creator.fullName}</em></p>
+            </div>
+            <button className="todo-edit" onClick={onEditTodo}>Edit</button>
+        </React.Fragment>
+    )
+}
+./pages/TodoApp.jsx
+import { TodoFilter } from "../cmps/TodoFilter.jsx"
+import { TodoList } from "../cmps/TodoList.jsx"
+import { TodoSort } from "../cmps/TodoSort.jsx"
+import { todoService } from "../services/todo.service.js"
+import { userService } from "../services/user.service.js"
+import { ADD_TODO, REMOVE_TODO, SET_TODOS, UPDATE_TODO, SET_FILTER_BY, SET_USERS, SET_SORT_BY } from "../store/store.js"
+
+const { NavLink } = ReactRouterDOM
+const { useSelector, useDispatch } = ReactRedux
+const { useEffect } = React
+
+export function TodoApp() {
+    const dispatch = useDispatch()
+    const todos = useSelector(state => state.todos)
+    const users = useSelector(state => state.users)
+    const filterBy = useSelector(state => state.filterBy)
+    const sortBy = useSelector(state => state.sortBy)
+
+    useEffect(() => {
+        todoService.query(filterBy, sortBy)
+            .then(todos => {
+                dispatch({ type: SET_TODOS, todos })
+            })
+            .catch(err => console.error(err))
+    }, [filterBy, sortBy])
+
+    useEffect(() => {
+        userService.query()
+            .then(users => {
+                dispatch({ type: SET_USERS, users })
+            })
+            .catch(err => console.error(err))
+    }, [])
+
+    function onUpdateTodo(updatedTodo) {
+        todoService.save(updatedTodo)
+            .then(todo => {
+                dispatch({ type: UPDATE_TODO, todo })
+            })
+            .catch(err => console.error(err))
+    }
+
+    function onRemoveTodo(todo) {
+        todoService.remove(todo)
+            .then(() => {
+                dispatch({ type: REMOVE_TODO, todo })
+            })
+            .catch(err => console.error(err))
+    }
+
+    function onAddTodo() {
+        const loggedInUser = userService.getLoggedInUser()
+        const newTodo = todoService.getNewTodo()
+        newTodo.title = prompt('Enter todo title') || 'No title'
+        newTodo.text = prompt('Enter todo text') || 'No text'
+        todoService.save(newTodo)
+            .then(todo => {
+                dispatch({ type: ADD_TODO, todo })
+            })
+    }
+
+    function onSetFilterBy(filterBy) {
+        dispatch({ type: SET_FILTER_BY, filterBy })
+    }
+
+    function onSetSortBy(sortBy) {
+        dispatch({ type: SET_SORT_BY, sortBy })
+    }
+
+    const todoFilterProps = {
+        users,
+        filterBy,
+        onSetFilterBy,
+    }
+
+    const todoSortProps = {
+        sortBy,
+        onSetSortBy,
+    }
+
+    const todoListProps = {
+        todos,
+        onUpdateTodo,
+        onRemoveTodo,
+    }
+
+    return (
+        <React.Fragment>
+            <h1>This is the todo page</h1>
+            <section className="button-container">
+                <NavLink to="/">Go back home</NavLink>
+                <button
+                    className="add-todo"
+                    onClick={onAddTodo}
+                >
+                    Add todo
+                </button>
+            </section>
+            <section className="flex">
+                <TodoFilter { ...todoFilterProps } />
+                <TodoSort { ...todoSortProps } />
+            </section>
+            <TodoList { ...todoListProps } />
+        </React.Fragment>
+    )
+}
+./pages/UserDetails.jsx
+import { userService } from "../services/user.service.js"
+
+const { useState, useEffect } = React
+const { useSelector } = ReactRedux
+const { useParams } = ReactRouterDOM
+
+export function UserDetails() {
+    const params = useParams()
+    const [user, setUser] = useState(null)
+    const loggedInUser = useSelector(state => state.loggedInUser)
+
+    useEffect(() => {
+        if (params.userId) userService.get(params.userId).then(setUser).catch(err => console.err(err.response.data))
+        else if (loggedInUser) setUser(loggedInUser)
+    }, [params, loggedInUser])
+
+    if (! user) {
+        if (params.userId) return <h2>No such user id '{params.userId}'</h2>
+        else return <h2>Not logged in</h2>
+    }
+    return (
+        <React.Fragment>
+            <h2>{user.fullName}</h2>
+        </React.Fragment>
+    )
+}
+./app.js
+import { App } from './RootCmp.jsx'
+
+const elContainer = document.getElementById('root')
+const root = ReactDOM.createRoot(elContainer)
+root.render(<App />)

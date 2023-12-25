@@ -84,7 +84,6 @@ export function TodoApp() {
         onRemoveTodo,
     }
 
-    console.log('render')
     return (
         <React.Fragment>
             <h1>This is the todo page</h1>
