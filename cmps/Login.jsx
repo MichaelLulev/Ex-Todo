@@ -1,12 +1,10 @@
-import { SET_LOGGED_IN_USER } from '../store/store.js'
 import { userService } from '../services/user.service.js'
+import { signup, login, logout } from '../store/actions/user.actions.js'
 
 const { useState } = React
-const { useSelector, useDispatch } = ReactRedux
-const { NavLink } = ReactRouterDOM
+const { useSelector } = ReactRedux
 
 export function Login() {
-    const dispatch = useDispatch()
     const loggedInUser = useSelector(state => state.loggedInUser)
     const userTodos = useSelector(state => {
         return state.todos.filter(todo => loggedInUser && todo.creator._id === loggedInUser._id)
@@ -25,23 +23,12 @@ export function Login() {
 
     function onSubmitForm(ev) {
         ev.preventDefault()
-        if (! isLogin) var formFunction = userService.signup
-        else var formFunction = userService.login
-        formFunction(formUser)
-            .then(user => {
-                dispatch({ type: SET_LOGGED_IN_USER, user })
-                setFormUser(userService.getNewUser())
-            })
-            .catch(err => console.error(err))
+        if (isLogin) login(formUser)
+        else signup(formUser)
     }
 
     function onLogout() {
-        userService.logout()
-            .then(() => {
-                dispatch({ type: SET_LOGGED_IN_USER, user: null })
-                setFormUser(userService.getNewUser())
-            })
-            .catch(err => console.error(err))
+        logout()
     }
     
     return (

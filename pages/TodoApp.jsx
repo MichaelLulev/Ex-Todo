@@ -3,49 +3,33 @@ import { TodoList } from "../cmps/TodoList.jsx"
 import { TodoSort } from "../cmps/TodoSort.jsx"
 import { todoService } from "../services/todo.service.js"
 import { userService } from "../services/user.service.js"
-import { ADD_TODO, REMOVE_TODO, SET_TODOS, UPDATE_TODO, SET_FILTER_BY, SET_USERS, SET_SORT_BY } from "../store/store.js"
+import { addTodo, queryTodos, removeTodo, setTodoFilterBy, setTodoSortBy, updateTodo } from "../store/actions/todo.actions.js"
+import { queryUsers } from "../store/actions/user.actions.js"
 
 const { NavLink } = ReactRouterDOM
-const { useSelector, useDispatch } = ReactRedux
+const { useSelector } = ReactRedux
 const { useEffect } = React
 
 export function TodoApp() {
-    const dispatch = useDispatch()
     const todos = useSelector(state => state.todos)
     const users = useSelector(state => state.users)
     const filterBy = useSelector(state => state.filterBy)
     const sortBy = useSelector(state => state.sortBy)
 
     useEffect(() => {
-        todoService.query(filterBy, sortBy)
-            .then(todos => {
-                dispatch({ type: SET_TODOS, todos })
-            })
-            .catch(err => console.error(err))
+        queryTodos()
     }, [filterBy, sortBy])
 
     useEffect(() => {
-        userService.query()
-            .then(users => {
-                dispatch({ type: SET_USERS, users })
-            })
-            .catch(err => console.error(err))
+        queryUsers()
     }, [])
 
     function onUpdateTodo(updatedTodo) {
-        todoService.save(updatedTodo)
-            .then(todo => {
-                dispatch({ type: UPDATE_TODO, todo })
-            })
-            .catch(err => console.error(err))
+        updateTodo(updatedTodo)
     }
 
     function onRemoveTodo(todo) {
-        todoService.remove(todo)
-            .then(() => {
-                dispatch({ type: REMOVE_TODO, todo })
-            })
-            .catch(err => console.error(err))
+        removeTodo(todo)
     }
 
     function onAddTodo() {
@@ -53,18 +37,16 @@ export function TodoApp() {
         const newTodo = todoService.getNewTodo()
         newTodo.title = prompt('Enter todo title') || 'No title'
         newTodo.text = prompt('Enter todo text') || 'No text'
-        todoService.save(newTodo)
-            .then(todo => {
-                dispatch({ type: ADD_TODO, todo })
-            })
+        newTodo.creator = loggedInUser
+        addTodo(newTodo)
     }
 
     function onSetFilterBy(filterBy) {
-        dispatch({ type: SET_FILTER_BY, filterBy })
+        setTodoFilterBy(filterBy)
     }
 
     function onSetSortBy(sortBy) {
-        dispatch({ type: SET_SORT_BY, sortBy })
+        setTodoSortBy(sortBy)
     }
 
     const todoFilterProps = {

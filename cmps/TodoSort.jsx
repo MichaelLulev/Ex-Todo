@@ -34,7 +34,6 @@ export function TodoSort({ sortBy, onSetSortBy }) {
                         type="checkbox"
                         name="isAscending"
                         checked={sortBy.isAscending}
-                        // value={sortBy.isAscending}
                         onChange={onChangeSortBy}
                     />
                 </label>
